@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+blogPost
+{% endblock title %}
+
+{% block body %}
+{% load extras %}
+
+<div class="container my-3">
+    <h2> This Is Blog Post <h2>
+        <br>
+            <h2 class="blog-post-title"> Title:{{post.title}} </h2>
+            <p class="blog-post-meta">{{post.created}}  <a href="#"> Author : {{post.author}}</a>  <span>( {{post.views}} views ) </span></p>
+
+            <p>{{post.content|safe }}</p>
+            <hr>
+
+</div>
+<div class="container">
+    <h2>Comments {{comments.count}} </h2>
+
+    <div class="my-2">
+        {% if user.is_authenticated %}
+        <form method="post" action="/blog/comment/">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for=> Post Comment</label>
+                <input type="text" name="comment" class="form-control" placeholder="enter your comments....">
+
+            </div>
+            <input type="hidden" name="postSno" value="{{post.sno}}">
+            <input type="hidden" name="parentSno" value="">
+            <button type="submit" class="btn btn-primary my-2">Submit</button>
+
+        </form>
+        {% else %}
+
+
+        <p> please login topost a comments
+        <p>
+
+            {% endif %}
+
+    </div>
+    {% for comment in comments %}
+    <div class="row my-3">
+
+        <div class="col-md-2 ">
+            <img class="rounded mx-auto d-block m-100  p-2" src=" {% static 'img/login.png' %} " alt="user" width="200px"
+                srcset="">
+        </div>
+        <div class="col-md-10 ">
+
+            <b> {{comment.user.username}}</b> : at
+                {{comment.timestamp}}
+            <div> {{comment.comment}}</div>
+
+
+
+            <div class="reply mx-0">
+                {% if user.is_authenticated %}
+
+                <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#repyBox{{comment.sno}}" aria-expanded="false"
+                    aria-controls="repyBox{{comment.sno}}">
+                    Reply
+                </button>
+
+                <div class="collapse" id="repyBox{{comment.sno}}">
+                    <div class="card card-body my-2 ">
+                        <form method="post" action="/blog/comment/">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for=comment> Post reply</label>
+                                <input type="text" name="comment" class="form-control"
+                                    placeholder="enter your comments....">
+                                <input type="hidden" name="parentSno" value="{{comment.sno}}">
+                            </div>
+                            <input type="hidden" name="postSno" value="{{post.sno}}">
+
+                            <button type="submit" class="btn btn-primary my-2">Submit</button>
+
+                        </form>
+                    </div>
+                </div>
+
+                {% else %}
+                <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#repyBox{{comment.sno}}" aria-expanded="false"
+                    aria-controls="repyBox{{comment.sno}}" disabled>
+
+                    login to Reply
+                </button>
+                {% endif %}
+
+                <div class="replies  my-3">
+                    {% for reply in repDict|get_val:comment.sno %}
+                    {{reply}}
+                    <br>
+
+                    <div class="row my-2">
+                        <div class="col-md-3 ">
+                            <img class="rounded mx-auto d-block m-100  p-2" src=" {% static 'img/login.png' %} " alt="user"
+                                width="100px" srcset="">
+                        </div>
+                        <div class="col-md-10 ">
+
+                            <b> {{reply.user.username}}</b> : at 
+                                {{reply.timestamp }}
+                            <div> {{reply.comment}}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+
+            </div>
+        </div>
+
+
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock body %}
